@@ -9,12 +9,16 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::create('posts', function (Blueprint $table) {
+        Schema::create('movies', function (Blueprint $table) {
             $table->id();
 
+            $table->integer('tmdb_id')->unique()->nullable();
             $table->string('title')->nullable();
-            $table->text('content')->nullable();
-            $table->dateTime('last_indexed_at')->nullable();
+            $table->text('overview')->nullable();
+            $table->date('release_date')->nullable();
+            $table->string('poster_path')->nullable();
+            $table->float('vote_average')->nullable();
+            $table->float('vote_count')->nullable();
 
             $table->timestamps();
         });
@@ -24,6 +28,6 @@ return new class extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
-        Schema::dropIfExists('posts');
+        Schema::dropIfExists('movies');
     }
 };
