@@ -267,7 +267,3 @@ curl -X DELETE "localhost:9200/movies"
 php artisan tinker
 >>> App\Models\Movie::all()->each(fn($movie) => dispatch(new App\Jobs\IndexModelToElasticsearch($movie)));
 ```
-
-## Лицензия
-
-MIT License
