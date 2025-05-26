@@ -1,61 +1,273 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Movie Search API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel-приложение для поиска фильмов с использованием Elasticsearch. Приложение интегрируется с TMDb API для импорта данных о фильмах и жанрах.
 
-## About Laravel
+## Возможности
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- 🔍 Полнотекстовый поиск фильмов по названию, описанию и жанрам
+- 📊 Взвешенный поиск с настраиваемыми коэффициентами релевантности
+- 🎬 Интеграция с TMDb API для импорта популярных фильмов
+- 🏷️ Поддержка поиска по связанным жанрам
+- ⚡ Автоматическая индексация в Elasticsearch при создании/обновлении записей
+- 📄 Пагинация результатов поиска
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Требования
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.1+
+- Laravel 10+
+- Elasticsearch 7.x/8.x
+- Composer
 
-## Learning Laravel
+## Установка
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 1. Клонирование и установка зависимостей
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+git clone https://github.com/MelomiLight/elasticsearch-laravel.git
+cd movie-search-api
+composer install
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. Настройка окружения
 
-## Laravel Sponsors
+Скопируйте файл окружения и настройте переменные:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-### Premium Partners
+### 3. Настройка переменных окружения
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Добавьте в `.env` файл следующие переменные:
 
-## Contributing
+```env
+# Elasticsearch
+ELASTICSEARCH_HOST=http://localhost:9200
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# TMDb API
+TMDB_API_KEY=your_tmdb_api_key_here
 
-## Code of Conduct
+# Database
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=movie_search
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Настройка базы данных
 
-## Security Vulnerabilities
+```bash
+php artisan migrate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. Запуск Elasticsearch
 
-## License
+Убедитесь, что Elasticsearch запущен и доступен по адресу, указанному в `ELASTICSEARCH_HOST`.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Использование
+
+### Импорт данных
+
+#### Импорт жанров из TMDb:
+
+```bash
+php artisan genres:import
+```
+
+#### Импорт популярных фильмов из TMDb:
+
+```bash
+php artisan movies:import-popular
+```
+
+Эта команда импортирует первые 10 страниц популярных фильмов (~200 фильмов).
+
+### API Endpoints
+
+#### Поиск фильмов
+
+```http
+GET /api/V1/movies/search
+```
+
+**Параметры запроса:**
+
+- `query` (string, обязательный) - поисковый запрос
+- `page` (integer, опциональный) - номер страницы (по умолчанию: 1)
+- `perPage` (integer, опциональный) - количество результатов на странице (по умолчанию: 10)
+
+**Пример запроса:**
+
+```bash
+curl "http://localhost:8000/api/V1/movies/search?query=spider&page=1&perPage=5"
+```
+
+**Пример ответа:**
+
+```json
+{
+  "data": {
+    "movies": [
+      {
+        "id": 1,
+        "tmdb_id": 557,
+        "title": "Spider-Man",
+        "overview": "After being bitten by a genetically altered spider...",
+        "release_date": "2002-05-01",
+        "poster_path": "/gh4cZbhZxyTbgxQPxD0dOudNPTn.jpg",
+        "vote_average": 7.2,
+        "vote_count": 13507,
+        "genres": [
+          {
+            "id": 1,
+            "name": "Action"
+          },
+          {
+            "id": 2,
+            "name": "Fantasy"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Архитектура поиска
+
+### Поисковые поля и веса
+
+Поиск выполняется по следующим полям с указанными весами:
+
+- `title` (вес: 3) - название фильма
+- `overview` (вес: 1) - описание фильма
+- `genres.name` (вес: 2) - названия жанров
+
+### Автоматическая индексация
+
+Приложение использует trait `ESearchable`, который автоматически:
+
+- Индексирует модели в Elasticsearch при сохранении
+- Удаляет документы из индекса при удалении моделей
+- Использует Laravel Jobs для асинхронной обработки
+
+### Структура индекса
+
+Каждый фильм индексируется в Elasticsearch со следующей структурой:
+
+```json
+{
+  "title": "Spider-Man",
+  "overview": "After being bitten by a genetically altered spider...",
+  "genres": [
+    {"name": "Action"},
+    {"name": "Fantasy"}
+  ]
+}
+```
+
+## Модели
+
+### Movie
+
+Основная модель фильма с полями:
+
+- `tmdb_id` - ID фильма в TMDb
+- `title` - название
+- `overview` - описание
+- `release_date` - дата выхода
+- `poster_path` - путь к постеру
+- `vote_average` - средняя оценка
+- `vote_count` - количество голосов
+
+### Genre
+
+Модель жанра:
+
+- `tmdb_id` - ID жанра в TMDb
+- `name` - название жанра
+
+## Конфигурация
+
+### Elasticsearch
+
+Настройки Elasticsearch находятся в `config/services.php`:
+
+```php
+'elasticsearch' => [
+    'hosts' => [
+        env('ELASTICSEARCH_HOST', 'http://localhost:9200')
+    ],
+],
+```
+
+### Настройка поиска
+
+Для настройки поисковых полей и их весов отредактируйте свойства в модели `Movie`:
+
+```php
+protected static array $esSearchableFields = [
+    'title' => 3,        // Вес для названия
+    'overview' => 1,     // Вес для описания
+];
+
+protected static array $esSearchableRelations = [
+    'genres' => [
+        'name' => 2,     // Вес для названий жанров
+    ],
+];
+```
+
+## Разработка
+
+### Запуск очередей
+
+Для обработки заданий индексации запустите worker:
+
+```bash
+php artisan queue:work
+```
+
+### Тестирование
+
+```bash
+php artisan test
+```
+
+## Устранение неполадок
+
+### Elasticsearch недоступен
+
+Убедитесь, что:
+
+1. Elasticsearch запущен и доступен
+2. Правильно указан `ELASTICSEARCH_HOST` в `.env`
+3. Нет ограничений файрвола
+
+### Ошибки индексации
+
+Проверьте логи Laravel:
+
+```bash
+tail -f storage/logs/laravel.log
+```
+
+### Пересоздание индекса
+
+Если нужно пересоздать индекс Elasticsearch:
+
+```bash
+# Удалить индекс (замените 'movies' на имя вашего индекса)
+curl -X DELETE "localhost:9200/movies"
+
+# Переиндексировать все фильмы
+php artisan tinker
+>>> App\Models\Movie::all()->each(fn($movie) => dispatch(new App\Jobs\IndexModelToElasticsearch($movie)));
+```
+
+## Лицензия
+
+MIT License
